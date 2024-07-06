@@ -1,8 +1,11 @@
+// src/controllers/weatherControllers.js
 const fs = require('fs');
+const path = require('path');
 
+// Helper functions to read and write from 'data.json'
 async function getDataFromDatabase() {
   return new Promise((resolve, reject) => {
-    fs.readFile('src/data/data.json', (err, data) => {
+    fs.readFile(path.join(__dirname, '../data/data.json'), (err, data) => {
       if (err) {
         reject(err);
       } else {
@@ -14,8 +17,8 @@ async function getDataFromDatabase() {
 
 async function saveDataToDatabase(data) {
   return new Promise((resolve, reject) => {
-    const jsonData = JSON.stringify(data);
-    fs.writeFile('src/data/data.json', jsonData, (err) => {
+    const jsonData = JSON.stringify(data, null, 2);
+    fs.writeFile(path.join(__dirname, '../data/data.json'), jsonData, (err) => {
       if (err) {
         reject(err);
       } else {
@@ -25,28 +28,22 @@ async function saveDataToDatabase(data) {
   });
 }
 
-/*
-  Instructions for students:
-  Implement the function to save weather alerts.
-
-  Function:
-    saveWeatherAlert(alertDetails)
-
-  Input:
-    - alertDetails (object): The details of the weather alert to be saved.
-
-
-  Tips:
-    - Use the provided functions getDataFromDatabase() and saveDataToDatabase() to read and write data from the 'data.json' file.
-    - Read the existing data from the 'data.json' file using getDataFromDatabase().
-    - Write the data to the 'data.json' file using saveDataToDatabase().    
-*/
-
-
-
-// Level 4: Post Weather Alerts
+// Function to save weather alerts
 async function saveWeatherAlert(alertDetails) {
-   // TODO: Implement this function
+  try {
+    const data = await getDataFromDatabase();
+    
+    // Append the new alert
+    data.alerts = data.alerts || []; // Ensure alerts is an array
+    data.alerts.push(alertDetails);
+
+    // Save the updated data back to the file
+    await saveDataToDatabase(data);
+    
+    return { status: 'success', message: 'Weather alert saved successfully' };
+  } catch (error) {
+    return { status: 'error', message: 'Failed to save weather alert', error: error.message };
+  }
 }
 
 module.exports = {
